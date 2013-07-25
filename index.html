@@ -1,0 +1,148 @@
+<html>
+<head>
+<style type="text/css">
+#placeholder{
+	margin:20px 10px;
+	position:relative;
+	overflow:hidden;
+}
+
+#placeholder li{
+	list-style:none;
+	float:left;
+	/* border:solid 1px #555; */
+	margin:0px;
+	padding:0px;
+	width:100px;
+	height:68px;
+	max-height:68px;
+	overflow:hidden;	
+	z-index:999;
+}
+
+#frame{
+	position: absolute;
+	top: -1px;
+	left:-1000px;
+	z-index:1000;
+	cursor:pointer;
+}
+</style>
+
+<script src="js/jquery-1.10.2.min.js" ></script>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		
+		$('#placeholder li').hover(
+			function(){
+				
+				$ele = this;
+				
+				setTimeout(function() {
+					$left = $($ele).offset().left - 18
+					
+					$('#frame').animate({left: $left}, 200, function(){
+						//fade all images
+						$('#placeholder li').find('.img_grayscale').stop().animate({opacity:0}, 500);
+						
+						//hilight current image
+						$($ele).find('.img_grayscale').stop().animate({opacity:1}, 500);
+						
+						$(this).attr('href', $($ele).find('a').attr('href'));
+						
+					});
+				}, 200);
+			},
+			function(){
+				
+			}
+		);
+		
+		$('#frame').click(function(){
+			if($(this).attr('href') != '') location.href = $(this).attr('href');
+		})
+	});
+
+	// On window load. This waits until images have loaded which is essential
+	$(window).load(function(){
+		
+		// Fade in images so there isn't a color "pop" document load and then on window load
+		$("#placeholder li img").fadeIn(500);
+		
+		// clone image
+		$('#placeholder li img').each(function(){
+			var el = $(this);
+			el.css({"position":"absolute"}).wrap("<div class='img_wrapper' style='display: inline-block'>").clone().addClass('img_grayscale').css({"position":"absolute","z-index":"998","opacity":"0"}).insertBefore(el).queue(function(){
+				var el = $(this);
+				el.parent().css({"width":this.width,"height":this.height, 'overflow':'hidden'});
+				el.dequeue();
+			});
+			this.src = grayscale(this.src);
+		});
+		
+		$('#placeholder li').css({'max-height':'68px', 'height':'68px', 'overflow':'hidden'});
+		
+	});
+	
+	// Grayscale w canvas method
+	function grayscale(src){
+		var canvas = document.createElement('canvas');
+		var ctx = canvas.getContext('2d');
+		var imgObj = new Image();
+		imgObj.src = src;
+		canvas.width = imgObj.width;
+		canvas.height = imgObj.height; 
+		ctx.drawImage(imgObj, 0, 0); 
+		var imgPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		for(var y = 0; y < imgPixels.height; y++){
+			for(var x = 0; x < imgPixels.width; x++){
+				var i = (y * 4) * imgPixels.width + x * 4;
+				var avg = (imgPixels.data[i] + imgPixels.data[i + 1] + imgPixels.data[i + 2]) / 3;
+				imgPixels.data[i] = avg; 
+				imgPixels.data[i + 1] = avg; 
+				imgPixels.data[i + 2] = avg;
+			}
+		}
+		ctx.putImageData(imgPixels, 0, 0, 0, 0, imgPixels.width, imgPixels.height);
+		return canvas.toDataURL();
+    }
+</script>
+
+</head>
+<body>
+<div id="frame"><img src="img/frame.png" /></div>
+<ul id="placeholder">
+	<li>
+		<a href="#1"><img src="img/1.jpg" /></a>
+	</li>
+	<li>
+		<a href="#2"><img src="img/2.jpg" /></a>
+	</li>
+	<li>
+		<a href="#3"><img src="img/3.jpg" /></a>
+	</li>
+	<li>
+		<a href="#4"><img src="img/4.jpg" /></a>
+	</li>
+	<li>
+		<a href="#5"><img src="img/5.jpg" /></a>
+	</li>
+	<li>
+		<a href="#6"><img src="img/6.jpg" /></a>
+	</li>
+	<li>
+		<a href="#7"><img src="img/7.jpg" /></a>
+	</li>
+	<li>
+		<a href="#8"><img src="img/8.jpg" /></a>
+	</li>
+	<li>
+		<a href="#9"><img src="img/9.jpg" /></a>
+	</li>
+	<li>
+		<a href="#10"><img src="img/10.jpg" /></a>
+	</li>
+</ul>
+</body>
+</html>
